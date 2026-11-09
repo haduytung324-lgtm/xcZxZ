@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Hướng dẫn cài đặt công tơ</title>
+<style>
+  :root {
+    --bg: #f5f7fa;
+    --card: #ffffff;
+    --primary: #0066cc;
+    --text: #1a1a1a;
+    --muted: #666;
+    --shadow: 0 4px 16px rgba(0,0,0,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding-bottom: 40px;
+  }
+  header {
+    background: linear-gradient(135deg, #0066cc, #004a99);
+    color: white;
+    padding: 20px 16px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  }
+  header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  header p {
+    font-size: 13px;
+    opacity: 0.9;
+  }
+  .search-box {
+    margin-top: 12px;
+    position: relative;
+  }
+  .search-box input {
+    width: 100%;
+    padding: 12px 16px 12px 42px;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    background: rgba(255,255,255,0.95);
+    outline: none;
+  }
+  .search-box::before {
+    content: "🔍";
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+  }
+  .container {
+    padding: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 14px;
+  }
+  @media (min-width: 480px) {
+    .grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+  }
+  @media (min-width: 768px) {
+    .grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; }
+  }
+  .card {
+    background: var(--card);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+  }
+  .card:active { transform: scale(0.97); }
+  .card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+  .thumb-wrap {
+    position: relative;
+    aspect-ratio: 16/10;
+    background: #eee;
+    overflow: hidden;
+  }
+  .thumb-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .play-badge {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .play-badge::before {
+    content: "▶";
+    font-size: 10px;
+  }
+  .card-info {
+    padding: 12px 12px 14px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .card-info h3 {
+    font-size: 14px;
+    font-weight: 650;
+    line-height: 1.3;
+    margin-bottom: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .meta {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .tag {
+    background: #e8f1ff;
+    color: var(--primary);
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  /* Detail view */
+  .detail-view {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #f5f7fa;
+    z-index: 1000;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .detail-view.active { display: block; }
+  .detail-header {
+    background: #0066cc;
+    color: white;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .detail-header button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 4px;
+  }
+  .detail-header h2 {
+    font-size: 16px;
+    font-weight: 650;
+  }
+  .video-wrap {
+    background: #000;
+    width: 100%;
+  }
+  .video-wrap iframe {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border: none;
+    display: block;
+  }
+  .notes {
+    background: white;
+    margin: 12px;
+    border-radius: 16px;
+    padding: 18px 16px 24px;
+    box-shadow: var(--shadow);
+  }
+  .notes h3 {
+    font-size: 17px;
+    margin-bottom: 12px;
+    color: #0066cc;
+  }
+  .notes ol {
+    padding-left: 20px;
+  }
+  .filters {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .filter-btn.active {
+    background: white;
+    color: #0066cc;
+  }
+  .card-btn {
+    margin-top: 8px;
+    background: #0066cc;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    width: 100%;
+    cursor: pointer;
+  }
+  .notes li {
+    margin-bottom: 14px;
+    line-height: 1.6;
+    font-size: 15.5px;
+    padding-left: 4px;
+  }
+  .notes li::marker {
+    font-weight: 700;
+    color: #0066cc;
+  }
+  .no-result {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+    grid-column: 1 / -1;
+  }
+  footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 12px;
+    color: #999;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚡ Hướng dẫn cài đặt công tơ</h1>
+  <p>Chọn loại công tơ để xem video + ghi chú chi tiết</p>
+  <div class="search-box">
+    <input type="text" id="search" placeholder="Tìm kiếm công tơ..." autocomplete="off">
+  </div>
+  <div class="filters">
+    <button class="filter-btn active" data-type="all">Tất cả</button>
+    <button class="filter-btn" data-type="3 pha">3 pha</button>
+    <button class="filter-btn" data-type="1 pha">1 pha</button>
+  </div>
+</header>
+
+<div class="container">
+  <div class="grid" id="grid"></div>
+</div>
+
+<footer>
+  Tài liệu nội bộ • Cập nhật từ Google Drive
+</footer>
+
+<!-- Detail View -->
+<div class="detail-view" id="detailView">
+  <div class="detail-header">
+    <button onclick="closeDetail()">←</button>
+    <h2 id="detailTitle">Hướng dẫn cài đặt</h2>
+  </div>
+  <div class="video-wrap">
+    <iframe id="videoFrame" allow="autoplay; encrypted-media" allowfullscreen style="width:100%; aspect-ratio:16/9; border:none; background:#000;"></iframe>
+  </div>
+  <div class="notes" id="notesContent"></div>
+</div>
+
+<script>
+const videos = [
+  {
+    id: "1d0eOIDA6Q7IgzT9V8GvmuEzv9RakWD-U",
+    name: "Elster A1700",
+    full: "1. Elster A1700 - v1.mp4",
+    size: "289 MB",
+    date: "7/5",
+    type: "3 pha",
+    notes: [
+      "<strong>HƯỚNG DẪN THAO TÁC</strong><br>CÔNG TƠ ĐIỆN TỬ 3 PHA A1700 (ELSTER)<br>Cấu hình truyền thông – Nạp biểu giá – Đổi mật khẩu cấp 3 – Lưu kết quả",
+      "<strong>Thông tin đăng nhập mặc định</strong><br>Tài khoản: Admin | Mật khẩu: 12345",
+      "<strong>Bước 1: Cấu hình cổng truyền thông</strong><br>• Chọn menu SYSTEM → COMMUNICATION SERVER SETUP → AUTO DETECT<br>• Chọn đúng cổng COM (cáp quang Optical Probe hoặc RS232/RS485)<br>• Nhấn SAVE để lưu cấu hình",
+      "<strong>Bước 2: Nạp biểu giá tương thích (Tariff Compatibility)</strong><br>• Vào SCHEMES → Đọc TARIFF COMPATIBILITY<br>• Chọn biểu giá: MULTI…..(P*****-5) VietNam<br>• Nhấn QUICK SEND (nút mũi tên đỏ)<br>• Nhập mật khẩu cấp 3 do X5 cung cấp → nhấn OK<br>• Chờ quá trình gửi hoàn tất",
+      "<strong>Bước 3: Đọc và lưu biểu giá vừa nạp</strong><br>• Mở READINGS → Đọc TARIFF<br>• Chọn file vừa đọc (theo số công tơ)<br>• Chọn Print → Print to PDF (lưu lại để đối chiếu)",
+      "<strong>Bước 4: Đổi mật khẩu cấp 3 theo Biểu giá TT60</strong><br>• Vào SCHEMES → Biểu giá TT60 → Passwords<br>• Đổi mật khẩu cấp 3 mới (ghi lại mật khẩu mới vào file riêng để quản lý)<br>• Nhấn QUICK SEND → OK<br>• Sau khi chạy xong: chọn Print to PDF (lưu bằng chứng đã đổi mật khẩu)",
+      "<strong>Bước 5: Gửi lại biểu giá với mật khẩu mới</strong><br>• Vào SCHEMES → Đọc TARIFF<br>• Nhấn QUICK SEND<br>• Nhập mật khẩu cấp 3 mới vừa đổi → nhấn OK<br>• Chờ quá trình hoàn tất",
+      "<strong>Bước 6: Đọc và lưu kết quả cuối cùng</strong><br>• Mở READINGS → Đọc TARIFF<br>• Chọn file vừa đọc (theo số công tơ)<br>• Chọn Print → Print to PDF<br>• Lưu file PDF này làm hồ sơ sau khi hoàn thành thao tác",
+      "<strong>LƯU Ý QUAN TRỌNG</strong><br>• Luôn lưu mật khẩu cấp 3 cũ và mới vào file riêng.<br>• Mỗi công tơ cần chọn đúng file theo số công tơ.<br>• Sau khi nạp xong nên kiểm tra lại chỉ số / biểu giá trên màn hình công tơ và đối chiếu với file PDF đã in.<br>• Phần mềm thường dùng: Power Master Unit của Elster/Honeywell.<br>• Đảm bảo kết nối cáp quang/optical probe ổn định trước khi thực hiện QUICK SEND."
+    ]
+  },
+  {
+    id: "1AjqfztNyJFZvMgZF2ctsSP8d6goz5D8k",
+    name: "Hữu Hồng DTS27 (đỏ)",
+    full: "2. HuuHong DTS27 (do).mp4",
+    size: "300 MB",
+    date: "7/5",
+    type: "3 pha",
+    notes: [
+      "<strong>BƯỚC 1: Đăng nhập phần mềm</strong><br>• Tài khoản: Management<br>• Mật khẩu: 12345",
+      "<strong>BƯỚC 2: Cài đặt cổng kết nối</strong><br>1. Vào mục Cài Đặt.<br>2. Chọn đúng cổng COM kết nối với công tơ DTS27.",
+      "<strong>BƯỚC 3: Kiểm tra công tơ</strong><br>1. Vào Danh sách công tơ.<br>2. Nhập thông tin và mật khẩu theo yêu cầu.<br>3. Nhấn ĐÃ KIỂM TRA.",
+      "<strong>BƯỚC 4: Đọc thông số</strong><br>1. Chọn FILE đọc đúng loại DTS27.<br>2. Thực hiện Đọc và lưu PDF.",
+      "<strong>BƯỚC 5: Cài đặt biểu giá / thông số</strong><br>1. Chọn FILE cài đặt phù hợp.<br>2. Nhấn Lập Trình.",
+      "<strong>BƯỚC 6: Đọc lại kiểm tra</strong><br>1. Đọc lại thông số sau lập trình.<br>2. In PDF để đối chiếu."
+    ]
+  },
+  {
+    id: "1HUjZaEi0QE35Q53OlGmd7QxfKIQFdT4u",
+    name: "Omni 3P",
+    full: "3. Omni 3P.mp4",
+    size: "182 MB",
+    date: "7/5",
+    type: "3 pha",
+    notes: [
+      "<strong>BƯỚC 1: Mở phần mềm Omni</strong><br>• Đăng nhập với tài khoản được cấp.",
+      "<strong>BƯỚC 2: Chọn cổng kết nối</strong><br>1. Vào phần Cài đặt cổng.<br>2. Chọn đúng cổng COM đang kết nối công tơ Omni 3P.",
+      "<strong>BƯỚC 3: Kết nối và đọc thông số</strong><br>1. Chọn loại công tơ Omni.<br>2. Thực hiện Đọc thông số.<br>3. Lưu hoặc in PDF.",
+      "<strong>BƯỚC 4: Cài đặt thông số</strong><br>1. Cài tỉ số CT, thời gian, biểu giá.<br>2. Nhấn Ghi / Lập trình.",
+      "<strong>BƯỚC 5: Kiểm tra lại</strong><br>1. Đọc lại thông số sau khi cài.<br>2. Đối chiếu và lưu kết quả."
+    ]
+  },
+  {
+    id: "1QbfgdmkJxdiOAIcq2JAoT4DJ9x-9ZWMK",
+    name: "Psmart 3P",
+    full: "4. Psmart 3P - ver.2.mp4",
+    size: "209 MB",
+    date: "8/5",
+    type: "3 pha",
+    notes: [
+      "<strong>Tài khoản:</strong> Admin &nbsp;&nbsp; <strong>Mật khẩu:</strong> Không có",
+      "<strong>Bước 1: Chọn cổng COM và nhập mật khẩu</strong><br>Chọn cổng COM … Nhập mật khẩu X5 được cung cấp.",
+      "<strong>Bước 2: Cài đặt thời gian (CLOCK)</strong><br>Chọn CLOCK → SET → SET DATE<br><em>Lưu ý: chờ SUCCESS mới chuyển bước khác.</em>",
+      "<strong>Bước 3: Đọc dữ liệu trước khi cài</strong><br>Chọn mục SET → IMPORT SOLUTIONS → Chọn mẫu đọc → READ → SAVE DATA (chọn file PDF) trước cài.",
+      "<strong>Bước 4: Import mẫu biểu giá TT60</strong><br>IMPORT SOLUTIONS → Mẫu cài biểu giá TT60<br>• Bỏ tích mật khẩu cấp 1, 2<br>• Tích mật khẩu cấp 3 thay đổi<br>• Lưu vào file riêng → SET",
+      "<strong>Bước 5: Đọc dữ liệu sau khi cài</strong><br>IMPORT SOLUTIONS → Chọn mẫu đọc → Chọn COM → Đổi mật khẩu mới → CONFIRM → READ → SAVE DATA (chọn file PDF) sau cài.",
+      "<strong>Lưu ý quan trọng:</strong> Thực hiện đúng thứ tự các bước. Luôn chờ trạng thái SUCCESS trước khi chuyển sang bước tiếp theo. Lưu file PDF dữ liệu trước và sau khi cài để đối chiếu."
+    ]
+  },
+  {
+    id: "1ST8JT-y5bbimHk1I3odU711RNeYpqIef",
+    name: "Vinasino 3P",
+    full: "5. Vinasino 3P.mp4",
+    size: "303 MB",
+    date: "7/5",
+    type: "3 pha",
+    notes: [
+      "<strong>Hướng dẫn lập trình công tơ Vinasino – VSE</strong><br>(Nhấn nút lập trình trên công tơ)",
+      "<strong>1. Chọn năm sản xuất</strong>",
+      "<strong>2. Chọn cổng COM...</strong>",
+      "<strong>3. Đọc thông số trước khi cài đặt</strong><br>• Vào mục đọc thông số<br>• Tích chọn mục 1, 2, 3<br>• Nhấn nút Đọc<br>• Nhập mật khẩu cấp 3 (mật khẩu do X5 cung cấp)<br>• Nhấn Đồng ý<br>• Xuất File PDF (bản trước khi cài đặt)",
+      "<strong>4. Thực hiện cài đặt tất cả</strong><br>• Chọn chức năng “Cài đặt tất cả”<br>• Tích chọn tất cả các mục<br>• Bỏ tích chọn mật khẩu cấp 1<br>• Đổi mật khẩu cấp 2 và cấp 3<br>• Lưu ý: Nếu không thấy ô mật khẩu cấp 3, hãy thu nhỏ cửa sổ phần mềm lại<br>• Chọn mục Ghi Biểu Giá<br>• Chọn tất cả<br>• Nhấn nút GHI",
+      "<strong>5. Đọc thông số sau khi cài đặt</strong><br>• Vào mục đọc thông số<br>• Tích chọn mục 1, 2, 3<br>• Nhấn nút Đọc<br>• Nhập mật khẩu cấp 3 mới (vừa đổi)<br>• Nhấn Đồng ý<br>• Xuất File PDF (bản sau khi cài đặt)",
+      "<strong>Ghi chú:</strong><br>• Nên lưu lại file PDF trước và sau khi cài đặt để đối chiếu.<br>• Đảm bảo đã kết nối đúng cổng COM và công tơ đã vào chế độ lập trình."
+    ]
+  },
+  {
+    id: "1pupjdFjzBoJyhNWmjcxm-V_z7Jwp_SSW",
+    name: "EMIC Gelex 3P",
+    full: "6. EMIC Gelex 3P.mp4",
+    size: "374 MB",
+    date: "7/5",
+    type: "3 pha",
+    notes: [
+      "<strong>GELEX</strong>",
+      "• Chọn đúng kiểu công tơ",
+      "• <strong>Tài khoản:</strong> admin – <strong>Mật khẩu:</strong> 000000",
+      "• Chọn cấu hình giao tiếp (cổng Com …)",
+      "• Chọn “Tham số công tơ” → Nhập mật khẩu X5 cung cấp",
+      "• Nhập File cấu hình đọc lần 1 → Bỏ tích mục “Mật khẩu” → ấn nút “Đọc” → lưu File PDF",
+      "• Nhập File cấu hình cài → Đổi mật khẩu cấp 2,3 (Lưu mật khẩu ra file riêng) → Ấn “Ghi” → Vào mục “Tham số công tơ” → Nhập mật khẩu cấp 3 mới đổi → Đồng ý",
+      "• Nhập File cấu hình đọc lần 2 → Bỏ tích mục “Mật khẩu” → ấn nút “Đọc” → lưu File PDF"
+    ]
+  },
+  {
+    id: "1G7q25gChp1rrO4-9fWZDseqs3TcwzXiU",
+    name: "Hữu Hồng HHM",
+    full: "7. HuuHong HHM.mp4",
+    size: "242 MB",
+    date: "7/5",
+    type: "1 pha",
+    notes: [
+      "<strong>BƯỚC 1: Đăng nhập phần mềm</strong><br>• Tài khoản: Management<br>• Mật khẩu: 12345",
+      "<strong>BƯỚC 2: Cài đặt cổng kết nối</strong><br>1. Vào mục Cài Đặt.<br>2. Tại danh sách thiết bị mạng, chọn cổng COM tương ứng.<br>3. Nhấn vào dấu … để chọn đúng cổng đang kết nối với thiết bị.",
+      "<strong>BƯỚC 3: Kiểm tra công tơ trong danh sách</strong><br>1. Vào mục “Danh sách công tơ”.<br>2. Tại Mục 1, tích vào ô “…”. <br>3. Nhập mật khẩu X5 (mật khẩu cấp 3 được cung cấp).<br>4. Tích chọn USER 1.<br>5. Nhập số công tơ: 000000001.<br>6. Nhấn nút ĐÃ KIỂM TRA.",
+      "<strong>BƯỚC 4: Đọc thông số công tơ (lần 1)</strong><br>1. Chọn mục Mở Thông Số.<br>2. Chọn FILE đọc đúng theo chủng loại công tơ đang thao tác.<br>3. Thực hiện Đọc.<br>4. In ra bản PDF (chọn Print to PDF) để lưu lại thông số trước khi lập trình.",
+      "<strong>BƯỚC 5: Cài đặt biểu giá</strong><br>1. Chọn mục Mở Thông Số.<br>2. Chọn FILE cài biểu giá đúng theo chủng loại công tơ.<br>3. Nhấn Lập Trình.",
+      "<strong>BƯỚC 6: Cài đặt / đổi mật khẩu</strong><br>1. Chọn mục Mở Thông Số.<br>2. Chọn FILE cài mật khẩu.<br>3. Điền các thông tin:<br>• Khoá xác thực cũ (hex): nhập mật khẩu X5 đã được cung cấp.<br>• Khoá xác thực mới (hex): nhập mật khẩu mới bạn muốn đặt.<br>4. Lưu mật khẩu mới vào một FILE riêng.<br>5. Nhấn Lập Trình.",
+      "<strong>BƯỚC 7: Đọc lại thông số sau khi lập trình</strong><br>1. Chọn mục Mở Thông Số.<br>2. Chọn lại FILE đọc đúng chủng loại công tơ.<br>3. Thực hiện Đọc.<br>4. In ra bản PDF để đối chiếu và lưu lại thông số sau khi đã lập trình."
+    ]
+  },
+  {
+    id: "1RieWfjUWXG_5Og3anRHwVOd1DtBIqdap",
+    name: "STAR DTS27 (xanh)",
+    full: "8. STAR DTS27 (xanh).mp4",
+    size: "309 MB",
+    date: "7/5",
+    type: "3 pha",
+    notes: [
+      "<strong>DTS 27 – Logo Xanh</strong><br>Quy trình đọc dữ liệu và lập trình công tơ điện tử",
+      "<strong>1. Mở HHM Server trước.</strong>",
+      "<strong>2. Mở HHM MMS.</strong>",
+      "<strong>3. CONFIRM.</strong>",
+      "<strong>4. Ấn COM CONFIGURE</strong> → Nhập mật khẩu X5 cấp (mật khẩu cấp 3rd) → CONFIRM.",
+      "<strong>5. Ấn READ VERSION</strong> → Ấn EXECUTE (OPERATION DATA).",
+      "<strong>6. Ấn READ METER DATA</strong> → Chọn các mục:<br>• ENERGY DATA<br>• METER EVENT<br>• METER VARIABLES",
+      "<strong>7. Tại ENERGY DATA</strong> → Chọn LOAD SCHEME:<br>• CHỌN FILE MẪU<br>• EXECUTE<br>• SAVE DATA",
+      "<strong>8. Tại READ METER EVENT</strong> → Chọn LOAD SCHEME:<br>• CHỌN FILE MẪU<br>• EXECUTE<br>• SAVE DATA",
+      "<strong>9. Tại READ METER VARIABLES</strong> → Chọn LOAD SCHEME:<br>• CHỌN FILE MẪU<br>• EXECUTE<br>• SAVE DATA",
+      "<strong>10. Ấn chuột phải</strong> → EXPORT DATA → Lưu FILE Excel.",
+      "<strong>11. Vào DAILY OPERATION</strong> → chọn METER PROGRAMMING → chọn LOAD SCHEME → chọn FILE lập trình.<br>• Chỉnh lại ngày giờ tại mục CLOCK SETTING và ACTIVE CALENDAR (tích đúp sau đó chọn SYSTEM TIME).",
+      "<strong>12. Tại mục LN ASSOCIATION THE THIRD CLASS PASSWORDS</strong> → tích đúp → Nhập mật khẩu mới → EXECUTE.",
+      "<strong>13. Chọn DAILY OPERATION</strong> → Chọn COM CONFIGURE → Nhập lại mật khẩu mới vừa đổi.<br>• Đọc lại thông số tại các mục: ENERGY DATA, METER EVENT, METER VARIABLES.<br>• Lưu FILE Excel."
+    ]
+  },
+  {
+    id: "1Uf623gPGFngbEDXnGgPQGGQyjTY4QY9j",
+    name: "Psmart 1P",
+    full: "9. Psmart 1P - ver.2.mp4",
+    size: "240 MB",
+    date: "8/5",
+    type: "1 pha",
+    notes: [
+      "<strong>Tài khoản:</strong> Admin &nbsp;&nbsp; <strong>Mật khẩu:</strong> Không có",
+      "<strong>Bước 1: Chọn cổng COM và nhập mật khẩu</strong><br>Chọn cổng COM … Nhập mật khẩu X5 được cung cấp.",
+      "<strong>Bước 2: Cài đặt thời gian (CLOCK)</strong><br>Chọn CLOCK → SET → SET DATE<br><em>Lưu ý: chờ SUCCESS mới chuyển bước khác.</em>",
+      "<strong>Bước 3: Đọc dữ liệu trước khi cài</strong><br>Chọn mục SET → IMPORT SOLUTIONS → Chọn mẫu đọc → READ → SAVE DATA (chọn file PDF) trước cài.",
+      "<strong>Bước 4: Import mẫu biểu giá TT60</strong><br>IMPORT SOLUTIONS → Mẫu cài biểu giá TT60<br>• Bỏ tích mật khẩu cấp 1, 2<br>• Tích mật khẩu cấp 3 thay đổi<br>• Lưu vào file riêng → SET",
+      "<strong>Bước 5: Đọc dữ liệu sau khi cài</strong><br>IMPORT SOLUTIONS → Chọn mẫu đọc → Chọn COM → Đổi mật khẩu mới → CONFIRM → READ → SAVE DATA (chọn file PDF) sau cài.",
+      "<strong>Lưu ý quan trọng:</strong> Thực hiện đúng thứ tự các bước. Luôn chờ trạng thái SUCCESS trước khi chuyển sang bước tiếp theo. Lưu file PDF dữ liệu trước và sau khi cài để đối chiếu."
+    ]
+  }
+];
+
+function getThumb(id) {
+  return `https://drive.google.com/thumbnail?id=${id}&sz=w600`;
+}
+function getPreview(id) {
+  return `https://drive.google.com/file/d/${id}/preview`;
+}
+
+function render(list = videos) {
+  const grid = document.getElementById("grid");
+  if (list.length === 0) {
+    grid.innerHTML = `<div class="no-result">Không tìm thấy công tơ nào</div>`;
+    return;
+  }
+  grid.innerHTML = list.map(v => `
+    <div class="card" onclick="openDetail('${v.id}')">
+      <div class="thumb-wrap">
+        <img src="${getThumb(v.id)}" alt="${v.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/400x250/eeeeee/999999?text=Công+tơ'">
+        <div class="play-badge">Xem</div>
+      </div>
+      <div class="card-info">
+        <h3>${v.name}</h3>
+        <div class="meta">
+          <span class="tag">${v.type}</span>
+          <span>${v.size}</span>
+        </div>
+        <button class="card-btn" onclick="event.stopPropagation(); openDetail('${v.id}')">▶ Xem hướng dẫn</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function openDetail(id) {
+  const video = videos.find(v => v.id === id);
+  if (!video) return;
+
+  document.getElementById("detailTitle").textContent = video.name;
+  document.getElementById("videoFrame").src = getPreview(id);
+
+  const notesHtml = `
+    <h3>📋 Hướng dẫn chi tiết cài đặt công tơ</h3>
+    <ol>
+      ${video.notes.map(step => `<li>${step}</li>`).join("")}
+    </ol>
+  `;
+  document.getElementById("notesContent").innerHTML = notesHtml;
+
+  document.getElementById("detailView").classList.add("active");
+  document.body.style.overflow = "hidden";
+}
+
+function closeDetail() {
+  document.getElementById("detailView").classList.remove("active");
+  document.getElementById("videoFrame").src = "";
+  document.body.style.overflow = "";
+}
+
+let currentFilter = "all";
+
+document.querySelectorAll(".filter-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentFilter = btn.dataset.type;
+    applyFilter();
+  });
+});
+
+function applyFilter() {
+  const q = document.getElementById("search").value.toLowerCase().trim();
+  const filtered = videos.filter(v => {
+    const matchType = currentFilter === "all" || v.type === currentFilter;
+    const matchSearch = !q || v.name.toLowerCase().includes(q) || v.full.toLowerCase().includes(q);
+    return matchType && matchSearch;
+  });
+  render(filtered);
+}
+
+document.getElementById("search").addEventListener("input", applyFilter);
+
+render();
+</script>
+</body>
+</html>
